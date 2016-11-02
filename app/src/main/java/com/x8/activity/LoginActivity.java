@@ -15,7 +15,6 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.x8.bean.StateBean;
 import com.x8.data.RuntimeData;
 import com.x8.socket.ByteArrayCodecFactory;
 import com.x8.socket.ISessionObj;
@@ -135,9 +134,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                 case SocketHandlerAdapter.SESSION_OPENED:
                     Toast.makeText(LoginActivity.this, getString(R.string.toast_msg_connect_success), Toast.LENGTH_SHORT).show();
                     RuntimeData.setSessionObj(sessionObj);
-                    editor.putString(IP_ADDRESS, ipAddress.getText().toString().trim());
-                    editor.putString(PORT, port.getText().toString().trim());
-                    editor.commit();
+
+                    if(!sp.getString(IP_ADDRESS, getString(R.string.connect_ip_text)).equals(ipAddress.getText().toString().trim())
+                    || !sp.getString(PORT, getString(R.string.connect_port_text)).equals(port.getText().toString().trim())) {
+                        editor.putString(IP_ADDRESS, ipAddress.getText().toString().trim());
+                        editor.putString(PORT, port.getText().toString().trim());
+                        editor.commit();
+                    }
+                    
                     sessionObj.write(RuntimeData.getQueryBean());
                     progressDialog.setMessage(getString(R.string.toast_msg_data_refreshing));
                     break;
