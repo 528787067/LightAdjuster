@@ -57,6 +57,7 @@
                 android:inputType="number"
                 android:maxLength="5"
                 android:background="@drawable/login_view_bg_black"
+                android:layout_marginRight="8dp"
                 android:paddingTop="6dp"
                 android:paddingBottom="6dp"
                 android:paddingLeft="10dp"
@@ -64,11 +65,12 @@
             <TextView
                 style="@style/WrapContentStyle.TextViewStyle"
                 android:id="@+id/button_connect"
+                android:layout_width="0dp"
+                android:layout_weight="1"
                 android:paddingTop="6dp"
                 android:paddingBottom="6dp"
-                android:paddingLeft="20dp"
-                android:paddingRight="20dp"
-                android:layout_marginLeft="15dp"
+                android:gravity="center"
+                android:layout_marginLeft="8dp"
                 android:clickable="true"
                 android:background="@drawable/connect_bn_bg"
                 android:text="@string/connect_button"/>

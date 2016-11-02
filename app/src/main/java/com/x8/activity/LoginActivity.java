@@ -141,7 +141,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                         editor.putString(PORT, port.getText().toString().trim());
                         editor.commit();
                     }
-                    
+
                     sessionObj.write(RuntimeData.getQueryBean());
                     progressDialog.setMessage(getString(R.string.toast_msg_data_refreshing));
                     break;
