@@ -83,6 +83,7 @@ public class SocketHandlerAdapter extends IoHandlerAdapter implements ISessionOb
             return;
         RuntimeData.getAdjustBean().beanInit();
         RuntimeData.getParamBean().beanInit();
+        RuntimeData.setWorkTime(0, 0, 0);
         eventReceived(session, SESSION_CLOSED);
     }
 
@@ -128,6 +129,7 @@ public class SocketHandlerAdapter extends IoHandlerAdapter implements ISessionOb
         RuntimeData.getParamBean().setLed2Value(bean.getLed2Value());
         RuntimeData.getParamBean().setLed3Value(bean.getLed3Value());
         RuntimeData.getParamBean().setLed4Value(bean.getLed4Value());
+        RuntimeData.setWorkTime(bytes[12]&0xFF, bytes[13]&0xFF, bytes[14]&0xFF);
         eventReceived(session, SESSION_MESSAGE_RECEIVED);
     }
 }

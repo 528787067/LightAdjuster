@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.Handler;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -28,10 +29,9 @@ import com.x8.utils.DataTranslate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.x8.utils.DataTranslate.beanModeToNum;
-import static com.x8.utils.DataTranslate.numToMode;
-
 public class MainActivity extends AppCompatActivity implements View.OnClickListener, SeekBar.OnSeekBarChangeListener {
+
+    private static final int REFRESH_TIMEOUT = 1000;
 
     private Animation bgSwitchAnimation;
 
@@ -43,12 +43,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private View background;
     private TextView workModeText;
+    private TextView workTimeText;
     private AlertDialog dialog;
     private AlertDialog exitAlert;
 
     private SocketBroadcastReceiver socketBroadcastReceiver;
+    private Handler handler;
+    private Runnable runnable;
 
     private ISessionObj sessionObj;
+    volatile private boolean refreshFlag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,6 +67,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         bgSwitchAnimation = AnimationUtils.loadAnimation(MainActivity.this, R.anim.background_switch);
         socketBroadcastReceiver = new SocketBroadcastReceiver();
         sessionObj = RuntimeData.getSessionObj();
+        refreshFlag = false;
+
+        handler = new Handler();
+        runnable = new Runnable() {
+            @Override
+            public void run() {
+                if(refreshFlag) {
+                    refreshFlag = false;
+                    Toast.makeText(MainActivity.this, getString(R.string.toast_msg_data_refresh_err), Toast.LENGTH_SHORT).show();
+                }
+                if(!sessionObj.isConnected())
+                    return;
+                sessionObj.write(RuntimeData.getQueryBean());
+                handler.postDelayed(this, REFRESH_TIMEOUT);
+            }
+        };
+        handler.post(runnable);
 
         viewInit();
     }
@@ -115,6 +136,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         this.findViewById(R.id.switch_bn_refresh).setOnClickListener(this);
         workModeText = (TextView) this.findViewById(R.id.work_mode_text);
+        workTimeText = (TextView) this.findViewById(R.id.work_time_text);
 
         dialog = new AlertDialog.Builder(MainActivity.this).create();
         dialog.setTitle(R.string.dialog_title);
@@ -151,12 +173,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void viewInitWithStateBean(StateBean adjustBean, StateBean paramBean) {
         if(adjustBean != null) {
             int mode = DataTranslate.beanModeToNum(adjustBean);
+
+            for(int i = 0; i < switchBnImg.size(); i++)
+                switchBnImg.get(i).setImageResource(SourceConstant.SWITCH_ICON_NORMAL_IMG[i]);
+            for(int i = 0; i < switchBnTitle.size(); i++)
+                switchBnTitle.get(i).setTextColor(getResources().getColor(R.color.switch_title_normal_color));
             if(mode == -1){
                 background.setBackgroundResource(R.mipmap.bg_not_connected);
-                for(int i = 0; i < switchBnImg.size(); i++)
-                    switchBnImg.get(i).setImageResource(SourceConstant.SWITCH_ICON_NORMAL_IMG[i]);
-                for(int i = 0; i < switchBnTitle.size(); i++)
-                    switchBnTitle.get(i).setTextColor(getResources().getColor(R.color.switch_title_normal_color));
             } else{
                 background.setBackgroundResource(SourceConstant.BACKGROUD_IMG[mode]);
                 switchBnImg.get(mode).setImageResource(SourceConstant.SWITCH_ICON_SELECTED_IMG[mode]);
@@ -171,6 +194,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(paramBean != null){
             int mode = DataTranslate.beanModeToNum(paramBean);
             workModeText.setText(getString(R.string.work_mode) + getString((mode == -1 ) ? R.string.mode_not_connected : SourceConstant.SWITCH_TITLE_STR[mode]));
+            workTimeText.setText(getString(R.string.work_time) + RuntimeData.getWorkTime());
             int[] ledValues = DataTranslate.ledNumToArr(paramBean);
             for(int i = 0; i < SourceConstant.PARAM_TEXT_ID.length; i++)
                 setValueOnTextView(ledParamText.get(i), SourceConstant.LED_VALUE_STR[i], ledValues[i]);
@@ -188,12 +212,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             return;
         }
         if(v.getId() == R.id.switch_bn_refresh){
+            refreshFlag = true;
             Toast.makeText(MainActivity.this, getString(R.string.toast_msg_data_refreshing), Toast.LENGTH_SHORT).show();
             sessionObj.write(RuntimeData.getQueryBean());
             return;
         }
         for(int i = 0; i < SourceConstant.SWITCH_BN_ID.length; i++){
-            int modeIndex = beanModeToNum(RuntimeData.getAdjustBean());
+            int modeIndex = DataTranslate.beanModeToNum(RuntimeData.getAdjustBean());
             if(v.getId() == SourceConstant.SWITCH_BN_ID[i]){
                 if(modeIndex == i) {
                     sessionObj.write(RuntimeData.getAdjustBean());
@@ -207,7 +232,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 switchBnTitle.get(i).setTextColor(getResources().getColor(R.color.switch_title_selected_color));
                 background.setBackgroundResource(SourceConstant.BACKGROUD_IMG[i]);
                 background.startAnimation(bgSwitchAnimation);
-                RuntimeData.getAdjustBean().setControlMode(numToMode(i));
+                RuntimeData.getAdjustBean().setControlMode(DataTranslate.numToMode(i));
                 sessionObj.write(RuntimeData.getAdjustBean());
                 return;
             }
@@ -261,7 +286,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     dialog.show();
                     break;
                 case SocketHandlerAdapter.SESSION_MESSAGE_RECEIVED:
-                    MainActivity.this.viewInitWithStateBean(null, RuntimeData.getParamBean());
+                    if(refreshFlag){
+                        refreshFlag = false;
+                        RuntimeData.getAdjustBean().setControlMode(RuntimeData.getParamBean().getControlMode());
+                        RuntimeData.getAdjustBean().setLed1Value(RuntimeData.getParamBean().getLed1Value());
+                        RuntimeData.getAdjustBean().setLed2Value(RuntimeData.getParamBean().getLed2Value());
+                        RuntimeData.getAdjustBean().setLed3Value(RuntimeData.getParamBean().getLed3Value());
+                        RuntimeData.getAdjustBean().setLed4Value(RuntimeData.getParamBean().getLed4Value());
+                        MainActivity.this.viewInitWithStateBean(RuntimeData.getAdjustBean(), RuntimeData.getParamBean());
+                        Toast.makeText(MainActivity.this, getString(R.string.toast_msg_data_refresh_success), Toast.LENGTH_SHORT).show();
+                    } else
+                        MainActivity.this.viewInitWithStateBean(null, RuntimeData.getParamBean());
                     break;
                 default:
                     return;

@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.Message;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -122,12 +123,13 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     RuntimeData.getAdjustBean().setLed3Value(RuntimeData.getParamBean().getLed3Value());
                     RuntimeData.getAdjustBean().setLed4Value(RuntimeData.getParamBean().getLed4Value());
                     progressDialog.dismiss();
+                    Toast.makeText(LoginActivity.this, getString(R.string.toast_msg_data_refresh_success), Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     break;
                 case SocketHandlerAdapter.SESSION_MESSAGE_RECEIVED_ERR:
                     if(sessionObj != null && sessionObj.isConnected())
                         sessionObj.close();
-                    dialog.setMessage(getString(R.string.dialog_msg_data_err));
+                    dialog.setMessage(getString(R.string.dialog_msg_data_parse_err));
                     progressDialog.dismiss();
                     dialog.show();
                     break;
@@ -143,7 +145,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     }
 
                     sessionObj.write(RuntimeData.getQueryBean());
-                    progressDialog.setMessage(getString(R.string.toast_msg_data_refreshing));
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if(progressDialog.isShowing()){
+                                if(sessionObj != null && sessionObj.isConnected())
+                                    sessionObj.close();
+                                dialog.setMessage(getString(R.string.dialog_msg_data_get_err));
+                                progressDialog.dismiss();
+                                dialog.show();
+                            }
+                        }
+                    }, CONNECT_TIME_OUT);
+                    progressDialog.setMessage(getString(R.string.dialog_msg_data_getting));
                     break;
                 case SocketHandlerAdapter.SESSION_CONNECT_ERROR:
                     dialog.setMessage(getString(R.string.dialog_msg_connect_err));
