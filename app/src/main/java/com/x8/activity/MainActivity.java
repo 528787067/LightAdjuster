@@ -289,13 +289,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         background.setBackgroundResource(R.mipmap.bg_manual);
         background.startAnimation(bgSwitchAnimation);
         RuntimeData.getAdjustBean().setControlMode(StateBean.ControlMode.MANUAL_MODE);
+        Toast.makeText(MainActivity.this, R.string.toast_msg_param_adjusting, Toast.LENGTH_SHORT).show();
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
         if(sessionObj != null && sessionObj.isConnected()) {
             manualFlag = true;
-            Toast.makeText(MainActivity.this, R.string.toast_msg_param_adjusting, Toast.LENGTH_SHORT).show();
             sessionObj.write(RuntimeData.getAdjustBean());
             return;
         }
@@ -337,7 +337,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                     }
                     if(manualFlag){
                         manualFlag = false;
-                        if(RuntimeData.getAdjustBean().getControlMode() == RuntimeData.getParamBean().getControlMode())
+                        if(RuntimeData.getAdjustBean().getControlMode() == RuntimeData.getParamBean().getControlMode()
+                        && RuntimeData.getAdjustBean().getLed1Value() == RuntimeData.getParamBean().getLed1Value()
+                        && RuntimeData.getAdjustBean().getLed2Value() == RuntimeData.getParamBean().getLed2Value()
+                        && RuntimeData.getAdjustBean().getLed3Value() == RuntimeData.getParamBean().getLed3Value()
+                        && RuntimeData.getAdjustBean().getLed4Value() == RuntimeData.getParamBean().getLed4Value())
                             Toast.makeText(MainActivity.this, R.string.toast_msg_param_adjust_success, Toast.LENGTH_SHORT).show();
                         else
                             Toast.makeText(MainActivity.this, R.string.toast_msg_param_adjust_err, Toast.LENGTH_SHORT).show();
