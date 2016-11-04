@@ -85,8 +85,11 @@ public class DataTranslate {
             case 0x08:
                 state.setControlMode(ControlMode.MANUAL_MODE);
                 break;
-            default:
+            case 0x80:
                 state.setControlMode(ControlMode.QUERY_MODE);
+                break;
+            default:
+                state.setControlMode(ControlMode.NOT_CONNECTED_MODE);
         }
         state.setLed1Value(bytes[4]&0xFF);
         state.setLed2Value(bytes[5]&0xFF);
@@ -97,20 +100,22 @@ public class DataTranslate {
 
     public static int beanModeToNum(StateBean state){
         switch (state.getControlMode()){
-            case SUNNY_DAY_MODE:
-                return 0;
-            case CLOUDY_DAY_MODE:
-                return 1;
-            case LIGHTNING_MODE:
-                return 2;
-            case PARTLY_CLOUDY_MODE:
-                return 3;
             case SPRING_FALL_MODE:
-                return 4;
+                return 0;
             case SUMMER_MODE:
-                return 5;
+                return 1;
             case WINTER_MODE:
+                return 2;
+            case SUNNY_DAY_MODE:
+                return 3;
+            case CLOUDY_DAY_MODE:
+                return 4;
+            case LIGHTNING_MODE:
+                return 5;
+            case PARTLY_CLOUDY_MODE:
                 return 6;
+            case MANUAL_MODE:
+                return 7;
             default:
                 return -1;
         }
@@ -119,19 +124,21 @@ public class DataTranslate {
     public static ControlMode numToMode(int num){
         switch (num){
             case 0:
-                return ControlMode.SUNNY_DAY_MODE;
-            case 1:
-                return ControlMode.CLOUDY_DAY_MODE;
-            case 2:
-                return ControlMode.LIGHTNING_MODE;
-            case 3:
-                return ControlMode.PARTLY_CLOUDY_MODE;
-            case 4:
                 return ControlMode.SPRING_FALL_MODE;
-            case 5:
+            case 1:
                 return ControlMode.SUMMER_MODE;
-            case 6:
+            case 2:
                 return ControlMode.WINTER_MODE;
+            case 3:
+                return ControlMode.SUNNY_DAY_MODE;
+            case 4:
+                return ControlMode.CLOUDY_DAY_MODE;
+            case 5:
+                return ControlMode.LIGHTNING_MODE;
+            case 6:
+                return ControlMode.PARTLY_CLOUDY_MODE;
+            case 7:
+                return ControlMode.MANUAL_MODE;
             default:
                 return ControlMode.NOT_CONNECTED_MODE;
         }
@@ -153,4 +160,5 @@ public class DataTranslate {
             arr[3] = 99;
         return arr;
     }
+
 }

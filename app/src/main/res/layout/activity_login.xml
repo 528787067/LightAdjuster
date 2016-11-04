@@ -1,16 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@mipmap/bg_not_connected">
-
+    android:layout_height="wrap_content" >
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:background="@drawable/views_background"
-        android:layout_margin="30dp"
         android:padding="25dp"
+        android:layout_marginLeft="30dp"
+        android:layout_marginRight="30dp"
+        android:background="@drawable/views_background"
         android:orientation="vertical">
         <TextView
             android:layout_width="match_parent"
@@ -20,10 +19,15 @@
             android:textStyle="bold"
             android:textSize="22sp"
             android:text="@string/connect_title"/>
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="2dp"
+            android:layout_marginTop="10dp"
+            android:background="@drawable/line_view_white"/>
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="30dp"
             android:orientation="horizontal">
             <TextView
                 style="@style/WrapContentStyle.TextViewStyle"
@@ -76,5 +80,4 @@
                 android:text="@string/connect_button"/>
         </LinearLayout>
     </LinearLayout>
-
 </FrameLayout>

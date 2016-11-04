@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private ISessionObj sessionObj;
     volatile private boolean refreshFlag;
+    volatile private boolean modeSwitchFlag;
+    volatile private boolean manualFlag;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,6 +70,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         socketBroadcastReceiver = new SocketBroadcastReceiver();
         sessionObj = RuntimeData.getSessionObj();
         refreshFlag = false;
+        modeSwitchFlag = false;
+        manualFlag = false;
 
         handler = new Handler();
         runnable = new Runnable() {
@@ -75,7 +79,15 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             public void run() {
                 if(refreshFlag) {
                     refreshFlag = false;
-                    Toast.makeText(MainActivity.this, getString(R.string.toast_msg_data_refresh_err), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, R.string.toast_msg_data_refresh_err, Toast.LENGTH_SHORT).show();
+                }
+                if(modeSwitchFlag){
+                    modeSwitchFlag = false;
+                    Toast.makeText(MainActivity.this, R.string.toast_msg_mode_switch_err, Toast.LENGTH_SHORT).show();
+                }
+                if(manualFlag){
+                    manualFlag = false;
+                    Toast.makeText(MainActivity.this, R.string.toast_msg_param_adjust_err, Toast.LENGTH_SHORT).show();
                 }
                 if(!sessionObj.isConnected())
                     return;
@@ -182,8 +194,10 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 background.setBackgroundResource(R.mipmap.bg_not_connected);
             } else{
                 background.setBackgroundResource(SourceConstant.BACKGROUD_IMG[mode]);
-                switchBnImg.get(mode).setImageResource(SourceConstant.SWITCH_ICON_SELECTED_IMG[mode]);
-                switchBnTitle.get(mode).setTextColor(getResources().getColor(R.color.switch_title_selected_color));
+                if(mode < SourceConstant.SWITCH_ICON_SELECTED_IMG.length) {
+                    switchBnImg.get(mode).setImageResource(SourceConstant.SWITCH_ICON_SELECTED_IMG[mode]);
+                    switchBnTitle.get(mode).setTextColor(getResources().getColor(R.color.switch_title_selected_color));
+                }
             }
             int[] ledValues = DataTranslate.ledNumToArr(adjustBean);
             for(int i = 0; i < ledAdjustSeekBar.size(); i++)
@@ -213,18 +227,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
         if(v.getId() == R.id.switch_bn_refresh){
             refreshFlag = true;
-            Toast.makeText(MainActivity.this, getString(R.string.toast_msg_data_refreshing), Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, R.string.toast_msg_data_refreshing, Toast.LENGTH_SHORT).show();
             sessionObj.write(RuntimeData.getQueryBean());
             return;
         }
         for(int i = 0; i < SourceConstant.SWITCH_BN_ID.length; i++){
-            int modeIndex = DataTranslate.beanModeToNum(RuntimeData.getAdjustBean());
             if(v.getId() == SourceConstant.SWITCH_BN_ID[i]){
+                int modeIndex = DataTranslate.beanModeToNum(RuntimeData.getAdjustBean());
                 if(modeIndex == i) {
+                    refreshFlag = true;
+                    Toast.makeText(MainActivity.this, R.string.toast_msg_data_refreshing, Toast.LENGTH_SHORT).show();
                     sessionObj.write(RuntimeData.getAdjustBean());
                     return;
                 }
-                if(modeIndex != -1) {
+                modeSwitchFlag = true;
+                if(modeIndex >= 0 && modeIndex < SourceConstant.SWITCH_ICON_NORMAL_IMG.length) {
                     switchBnImg.get(modeIndex).setImageResource(SourceConstant.SWITCH_ICON_NORMAL_IMG[modeIndex]);
                     switchBnTitle.get(modeIndex).setTextColor(getResources().getColor(R.color.switch_title_normal_color));
                 }
@@ -233,6 +250,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 background.setBackgroundResource(SourceConstant.BACKGROUD_IMG[i]);
                 background.startAnimation(bgSwitchAnimation);
                 RuntimeData.getAdjustBean().setControlMode(DataTranslate.numToMode(i));
+                Toast.makeText(MainActivity.this, R.string.toast_msg_mode_switching, Toast.LENGTH_SHORT).show();
                 sessionObj.write(RuntimeData.getAdjustBean());
                 return;
             }
@@ -261,20 +279,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
+        if(sessionObj == null || !sessionObj.isConnected())
+            return;
+        if(RuntimeData.getAdjustBean().getControlMode() == StateBean.ControlMode.MANUAL_MODE)
+            return;
+        int modeIndex = DataTranslate.beanModeToNum(RuntimeData.getAdjustBean());
+        switchBnImg.get(modeIndex).setImageResource(SourceConstant.SWITCH_ICON_NORMAL_IMG[modeIndex]);
+        switchBnTitle.get(modeIndex).setTextColor(getResources().getColor(R.color.switch_title_normal_color));
+        background.setBackgroundResource(R.mipmap.bg_manual);
+        background.startAnimation(bgSwitchAnimation);
+        RuntimeData.getAdjustBean().setControlMode(StateBean.ControlMode.MANUAL_MODE);
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        if(sessionObj != null && sessionObj.isConnected())
+        if(sessionObj != null && sessionObj.isConnected()) {
+            manualFlag = true;
+            Toast.makeText(MainActivity.this, R.string.toast_msg_param_adjusting, Toast.LENGTH_SHORT).show();
+            sessionObj.write(RuntimeData.getAdjustBean());
             return;
+        }
         dialog.show();
     }
 
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
+        if (keyCode == KeyEvent.KEYCODE_BACK)
             exitAlert.show();
-        }
         return true;
     }
 
@@ -294,9 +325,24 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         RuntimeData.getAdjustBean().setLed3Value(RuntimeData.getParamBean().getLed3Value());
                         RuntimeData.getAdjustBean().setLed4Value(RuntimeData.getParamBean().getLed4Value());
                         MainActivity.this.viewInitWithStateBean(RuntimeData.getAdjustBean(), RuntimeData.getParamBean());
-                        Toast.makeText(MainActivity.this, getString(R.string.toast_msg_data_refresh_success), Toast.LENGTH_SHORT).show();
-                    } else
-                        MainActivity.this.viewInitWithStateBean(null, RuntimeData.getParamBean());
+                        Toast.makeText(MainActivity.this, R.string.toast_msg_data_refresh_success, Toast.LENGTH_SHORT).show();
+                        return;
+                    }
+                    if(modeSwitchFlag) {
+                        modeSwitchFlag = false;
+                        if(RuntimeData.getAdjustBean().getControlMode() == RuntimeData.getParamBean().getControlMode())
+                            Toast.makeText(MainActivity.this, R.string.toast_msg_mode_switch_success, Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(MainActivity.this, R.string.toast_msg_mode_switch_err, Toast.LENGTH_SHORT).show();
+                    }
+                    if(manualFlag){
+                        manualFlag = false;
+                        if(RuntimeData.getAdjustBean().getControlMode() == RuntimeData.getParamBean().getControlMode())
+                            Toast.makeText(MainActivity.this, R.string.toast_msg_param_adjust_success, Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(MainActivity.this, R.string.toast_msg_param_adjust_err, Toast.LENGTH_SHORT).show();
+                    }
+                    MainActivity.this.viewInitWithStateBean(null, RuntimeData.getParamBean());
                     break;
                 default:
                     return;

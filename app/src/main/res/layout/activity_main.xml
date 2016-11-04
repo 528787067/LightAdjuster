@@ -11,26 +11,12 @@
     android:background="@mipmap/bg_not_connected"
     tools:context="com.x8.activity.MainActivity">
 
-    <TextView style="@style/WrapContentStyle.TextViewStyle.TitleTextViewStyle" android:breakStrategy="simple" android:text="@string/title_mode_switch" />
+    <LinearLayout style="@style/ParamAdjustLayoutStyle.TitleViewStyle">
+        <View style="@style/TitleViewLineStyle"/>
+        <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/title_mode_switch" />
+        <View style="@style/TitleViewLineStyle"/>
+    </LinearLayout>
     <TableLayout style="@style/ViewsBackgroundStyle">
-        <TableRow>
-            <LinearLayout style="@style/SwitchBnStyle" android:id="@+id/switch_bn_sunny_day">
-                <ImageView style="@style/WrapContentStyle" android:src="@mipmap/bn_normal_sunny_day"/>
-                <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/switch_bn_sunny_day"/>
-            </LinearLayout>
-            <LinearLayout style="@style/SwitchBnStyle" android:id="@+id/switch_bn_cloudy_day">
-                <ImageView style="@style/WrapContentStyle" android:src="@mipmap/bn_normal_cloudy_day"/>
-                <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/switch_bn_cloudy_day"/>
-            </LinearLayout>
-            <LinearLayout style="@style/SwitchBnStyle" android:id="@+id/switch_bn_lightning">
-                <ImageView style="@style/WrapContentStyle" android:src="@mipmap/bn_normal_lightning"/>
-                <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/switch_bn_lightning"/>
-            </LinearLayout>
-            <LinearLayout style="@style/SwitchBnStyle" android:id="@+id/switch_bn_partly_cloudy">
-                <ImageView style="@style/WrapContentStyle" android:src="@mipmap/bn_normal_partly_cloudy"/>
-                <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/switch_bn_partly_cloudy"/>
-            </LinearLayout>
-        </TableRow>
         <TableRow>
             <LinearLayout style="@style/SwitchBnStyle" android:id="@+id/switch_bn_spring_fall">
                 <ImageView style="@style/WrapContentStyle" android:src="@mipmap/bn_normal_spring_fall"/>
@@ -49,29 +35,56 @@
                 <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/refresh"/>
             </LinearLayout>
         </TableRow>
+        <TableRow>
+            <LinearLayout style="@style/SwitchBnStyle" android:id="@+id/switch_bn_sunny_day">
+                <ImageView style="@style/WrapContentStyle" android:src="@mipmap/bn_normal_sunny_day"/>
+                <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/switch_bn_sunny_day"/>
+            </LinearLayout>
+            <LinearLayout style="@style/SwitchBnStyle" android:id="@+id/switch_bn_cloudy_day">
+                <ImageView style="@style/WrapContentStyle" android:src="@mipmap/bn_normal_cloudy_day"/>
+                <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/switch_bn_cloudy_day"/>
+            </LinearLayout>
+            <LinearLayout style="@style/SwitchBnStyle" android:id="@+id/switch_bn_lightning">
+                <ImageView style="@style/WrapContentStyle" android:src="@mipmap/bn_normal_lightning"/>
+                <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/switch_bn_lightning"/>
+            </LinearLayout>
+            <LinearLayout style="@style/SwitchBnStyle" android:id="@+id/switch_bn_partly_cloudy">
+                <ImageView style="@style/WrapContentStyle" android:src="@mipmap/bn_normal_partly_cloudy"/>
+                <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/switch_bn_partly_cloudy"/>
+            </LinearLayout>
+        </TableRow>
     </TableLayout>
 
-    <TextView style="@style/WrapContentStyle.TextViewStyle.TitleTextViewStyle" android:text="@string/title_param_adjust"/>
+    <LinearLayout style="@style/ParamAdjustLayoutStyle.TitleViewStyle">
+        <View style="@style/TitleViewLineStyle"/>
+        <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/title_param_adjust" />
+        <View style="@style/TitleViewLineStyle"/>
+    </LinearLayout>
     <LinearLayout style="@style/ViewsBackgroundStyle" android:orientation="vertical">
-        <LinearLayout style="@style/ParamAdjustLayoutStyle" android:orientation="horizontal">
+        <LinearLayout style="@style/ParamAdjustLayoutStyle">
             <SeekBar style="@style/SeekBarStyle" android:id="@+id/led1_seekbar"/>
             <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/led_value_1"  android:id="@+id/led1_adjust_text"/>
         </LinearLayout>
-        <LinearLayout style="@style/ParamAdjustLayoutStyle" android:orientation="horizontal">
+        <LinearLayout style="@style/ParamAdjustLayoutStyle">
             <SeekBar style="@style/SeekBarStyle" android:id="@+id/led2_seekbar"/>
             <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/led_value_2" android:id="@+id/led2_adjust_text"/>
         </LinearLayout>
-        <LinearLayout style="@style/ParamAdjustLayoutStyle" android:orientation="horizontal">
+        <LinearLayout style="@style/ParamAdjustLayoutStyle">
             <SeekBar style="@style/SeekBarStyle" android:id="@+id/led3_seekbar"/>
             <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/led_value_3" android:id="@+id/led3_adjust_text"/>
         </LinearLayout>
-        <LinearLayout style="@style/ParamAdjustLayoutStyle" android:orientation="horizontal">
+        <LinearLayout style="@style/ParamAdjustLayoutStyle">
             <SeekBar style="@style/SeekBarStyle" android:id="@+id/led4_seekbar"/>
             <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/led_value_4" android:id="@+id/led4_adjust_text"/>
         </LinearLayout>
     </LinearLayout>
 
-    <TextView style="@style/WrapContentStyle.TextViewStyle.TitleTextViewStyle" android:text="@string/title_data_show"/>
+
+    <LinearLayout style="@style/ParamAdjustLayoutStyle.TitleViewStyle">
+        <View style="@style/TitleViewLineStyle"/>
+        <TextView style="@style/WrapContentStyle.TextViewStyle" android:text="@string/title_data_show" />
+        <View style="@style/TitleViewLineStyle"/>
+    </LinearLayout>
     <LinearLayout style="@style/ViewsBackgroundStyle" android:orientation="vertical">
         <TableLayout android:layout_width="match_parent" android:layout_height="wrap_content">
             <TableRow android:paddingTop="10dp" android:paddingBottom="10dp">

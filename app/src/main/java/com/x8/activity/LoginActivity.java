@@ -102,7 +102,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View v) {
         if(ipAddress.getText().toString().trim().length() == 0 || port.getText().toString().trim().length() == 0) {
-            Toast.makeText(LoginActivity.this, getString(R.string.toast_msg_edit_text_null), Toast.LENGTH_SHORT).show();
+            Toast.makeText(LoginActivity.this, R.string.toast_msg_edit_text_null, Toast.LENGTH_SHORT).show();
             return;
         }
         connector.setIp(ipAddress.getText().toString());
@@ -123,7 +123,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     RuntimeData.getAdjustBean().setLed3Value(RuntimeData.getParamBean().getLed3Value());
                     RuntimeData.getAdjustBean().setLed4Value(RuntimeData.getParamBean().getLed4Value());
                     progressDialog.dismiss();
-                    Toast.makeText(LoginActivity.this, getString(R.string.toast_msg_data_refresh_success), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, R.string.toast_msg_data_refresh_success, Toast.LENGTH_SHORT).show();
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     break;
                 case SocketHandlerAdapter.SESSION_MESSAGE_RECEIVED_ERR:
@@ -134,7 +134,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     dialog.show();
                     break;
                 case SocketHandlerAdapter.SESSION_OPENED:
-                    Toast.makeText(LoginActivity.this, getString(R.string.toast_msg_connect_success), Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginActivity.this, R.string.toast_msg_connect_success, Toast.LENGTH_SHORT).show();
                     RuntimeData.setSessionObj(sessionObj);
 
                     if(!sp.getString(IP_ADDRESS, getString(R.string.connect_ip_text)).equals(ipAddress.getText().toString().trim())

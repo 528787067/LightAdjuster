@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
 
+    <color name="login_dialog_activity_bg">#00000000</color>
     <color name="switch_title_normal_color">#ffffffff</color>
     <color name="switch_title_selected_color">#ffb8f4f8</color>
 </resources>
