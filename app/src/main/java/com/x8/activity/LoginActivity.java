@@ -25,6 +25,7 @@ import com.x8.socket.SocketHandlerAdapter;
 public class LoginActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static final int CONNECT_TIME_OUT = 2000;
+    private static final int TOAST_DELAY = 1000;
     private static final String DATA = "data";
     private static final String IP_ADDRESS = "ipAddress";
     private static final String PORT = "port";
@@ -40,6 +41,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
     private EditText port;
     private AlertDialog dialog;
     private ProgressDialog progressDialog;
+    private Handler handler;
+    private Toast toast;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +70,15 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
         progressDialog = new ProgressDialog(LoginActivity.this);
         progressDialog.setCancelable(false);
 
+        handler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                if(msg.what == TOAST_DELAY && toast != null)
+                    toast.cancel();
+            }
+        };
+
+        this.findViewById(R.id.about_title_bn).setOnClickListener(this);
         this.findViewById(R.id.button_connect).setOnClickListener(this);
     }
 
@@ -101,15 +113,19 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View v) {
-        if(ipAddress.getText().toString().trim().length() == 0 || port.getText().toString().trim().length() == 0) {
-            Toast.makeText(LoginActivity.this, R.string.toast_msg_edit_text_null, Toast.LENGTH_SHORT).show();
-            return;
+        if(v.getId() == R.id.button_connect) {
+            if (ipAddress.getText().toString().trim().length() == 0 || port.getText().toString().trim().length() == 0) {
+                toastMessage(R.string.toast_msg_edit_text_null);
+                return;
+            }
+            connector.setIp(ipAddress.getText().toString());
+            connector.setPort(Integer.parseInt(port.getText().toString().trim()));
+            progressDialog.setMessage(getString(R.string.dialog_msg_connecting));
+            progressDialog.show();
+            sessionObj = connector.connect();
+        } else{
+            this.startActivity(new Intent(LoginActivity.this, AboutActivity.class));
         }
-        connector.setIp(ipAddress.getText().toString());
-        connector.setPort(Integer.parseInt(port.getText().toString().trim()));
-        progressDialog.setMessage(getString(R.string.dialog_msg_connecting));
-        progressDialog.show();
-        sessionObj = connector.connect();
     }
 
     private class SocketBroadcastReceiver extends BroadcastReceiver{
@@ -123,8 +139,8 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     RuntimeData.getAdjustBean().setLed3Value(RuntimeData.getParamBean().getLed3Value());
                     RuntimeData.getAdjustBean().setLed4Value(RuntimeData.getParamBean().getLed4Value());
                     progressDialog.dismiss();
-                    Toast.makeText(LoginActivity.this, R.string.toast_msg_data_refresh_success, Toast.LENGTH_SHORT).show();
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    toastMessage(R.string.toast_msg_data_refresh_success);
+                    LoginActivity.this.startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     break;
                 case SocketHandlerAdapter.SESSION_MESSAGE_RECEIVED_ERR:
                     if(sessionObj != null && sessionObj.isConnected())
@@ -134,7 +150,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     dialog.show();
                     break;
                 case SocketHandlerAdapter.SESSION_OPENED:
-                    Toast.makeText(LoginActivity.this, R.string.toast_msg_connect_success, Toast.LENGTH_SHORT).show();
+                    toastMessage(R.string.toast_msg_connect_success);
                     RuntimeData.setSessionObj(sessionObj);
 
                     if(!sp.getString(IP_ADDRESS, getString(R.string.connect_ip_text)).equals(ipAddress.getText().toString().trim())
@@ -145,7 +161,7 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     }
 
                     sessionObj.write(RuntimeData.getQueryBean());
-                    new Handler().postDelayed(new Runnable() {
+                    handler.postDelayed(new Runnable() {
                         @Override
                         public void run() {
                             if(progressDialog.isShowing()){
@@ -168,5 +184,14 @@ public class LoginActivity extends AppCompatActivity implements View.OnClickList
                     return;
             }
         }
+    }
+
+    private void toastMessage(int textId){
+        if(toast != null)
+            toast.cancel();
+        handler.removeMessages(TOAST_DELAY);
+        toast = Toast.makeText(LoginActivity.this, textId, Toast.LENGTH_LONG);
+        toast.show();
+        handler.sendEmptyMessageDelayed(TOAST_DELAY, TOAST_DELAY);
     }
 }

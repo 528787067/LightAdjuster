@@ -42,9 +42,9 @@ public class DataTranslate {
                 bytes[3] = (byte) 0x80;
         }
         bytes[4] = (byte) state.getLed1Value();
-        bytes[5] = (byte) state.getLed2Value();
+        bytes[5] = (byte) state.getLed4Value();
         bytes[6] = (byte) state.getLed3Value();
-        bytes[7] = (byte) state.getLed4Value();
+        bytes[7] = (byte) state.getLed2Value();
         bytes[8] = (byte) 0x00;
         bytes[9] = (byte) 0x00;
         bytes[10] = (byte) 0x00;
@@ -92,9 +92,9 @@ public class DataTranslate {
                 state.setControlMode(ControlMode.NOT_CONNECTED_MODE);
         }
         state.setLed1Value(bytes[4]&0xFF);
-        state.setLed2Value(bytes[5]&0xFF);
+        state.setLed4Value(bytes[5]&0xFF);
         state.setLed3Value(bytes[6]&0xFF);
-        state.setLed4Value(bytes[7]&0xFF);
+        state.setLed2Value(bytes[7]&0xFF);
         return state;
     }
 

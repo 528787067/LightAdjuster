@@ -40,10 +40,12 @@
     <string name="dialog_msg_data_parse_err">抱歉，数据解析出错，请联系作者进行修复 ...</string>
     <string name="dialog_msg_data_get_err">抱歉，数据同步失败，连接已关闭，请稍后重试 ...</string>
     <string name="dialog_msg_not_connect">抱歉，当前设备连接已断开，是否返回重新连接？</string>
+    <string name="dialog_msg_connect_has_err">抱歉，设备连接出现异常，是否返回重新连接？</string>
+    <string name="dialog_msg_not_respone">抱歉，设备无响应，是否返回重新连接？</string>
     <string name="dialog_msg_connecting">设备连接中，请稍后 ...</string>
     <string name="dialog_msg_data_getting">数据同步中，请稍后 ...</string>
     <string name="dialog_exit_title">提示：</string>
-    <string name="dialog_exit_msg">是否断开当前连接？</string>
+    <string name="dialog_exit_msg">是否返回到连接界面？</string>
 
     <string name="toast_msg_data_refreshing">数据同步中 ...</string>
     <string name="toast_msg_data_refresh_success">数据同步成功</string>
@@ -56,5 +58,14 @@
     <string name="toast_msg_param_adjust_err">抱歉，参数调整失败 ...</string>
     <string name="toast_msg_edit_text_null">抱歉，请输入完整的 IP 地址和端口号 ...</string>
     <string name="toast_msg_connect_success">设备连接成功</string>
+
+    <string name="about_title">关于</string>
+    <string name="about_text">
+        \t名称：培养箱调光软件\n
+        \t所属：物理协会\n
+        \t作者：方块8\n
+        \t版本：1.0\n
+        \t说明：...
+    </string>
 
 </resources>

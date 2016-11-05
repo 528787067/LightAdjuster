@@ -13,7 +13,7 @@ public class DataCheck {
             return false;
         if(bytes[4] > 100 || bytes[5] > 100 || bytes[6] > 100 | bytes[7] > 100)
             return false;
-        if(bytes[13] < 0 || bytes[13] > 59 || bytes[14] < 0 || bytes[14] > 59)
+        if(bytes[12] < 0 || bytes[12] > 23 || bytes[13] < 0 || bytes[13] > 59 || bytes[14] < 0 || bytes[14] > 59)
             return false;
         return true;
     }
