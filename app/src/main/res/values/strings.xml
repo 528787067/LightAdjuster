@@ -61,12 +61,11 @@
 
     <string name="about_title">关于</string>
     <string name="about_text">
-        \t名称：培养箱调光软件\n
-        \t所属：物理协会\n
-        \t作者：方块8\n
-        \t版本：1.0\n
-        \t说明：广东海洋大学创客工作室\n
-        \t出品
+        名称：培养箱调光软件
+        \n所属：广东海洋大学物理协会
+        \n作者：方块8
+        \n版本：1.0
+        \n说明：创客工作室出品
     </string>
 
 </resources>
