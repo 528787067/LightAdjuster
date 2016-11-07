@@ -23,8 +23,8 @@
             android:background="@drawable/line_view_white"/>
         <TextView
             style="@style/WrapContentStyle.TextViewStyle"
+            android:id="@+id/about_text"
             android:layout_width="match_parent"
-            android:singleLine="false"
-            android:text="@string/about_text"/>
+            android:singleLine="false"/>
     </LinearLayout>
 </FrameLayout>
