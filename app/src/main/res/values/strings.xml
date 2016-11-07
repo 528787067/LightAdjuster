@@ -22,6 +22,7 @@
     <string name="switch_bn_manual">手动</string>
 
     <string name="refresh">同步</string>
+    <string name="switch_to_manual">切换为手动模式</string>
 
     <string name="led_value_1">LED1：</string>
     <string name="led_value_2">LED2：</string>

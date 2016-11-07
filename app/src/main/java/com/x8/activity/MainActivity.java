@@ -58,7 +58,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private ISessionObj sessionObj;
     volatile private boolean refreshFlag;
     volatile private boolean modeSwitchFlag;
-    volatile private boolean manualFlag;
     volatile private int queryCounts;
 
     @Override
@@ -76,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         sessionObj = RuntimeData.getSessionObj();
         refreshFlag = false;
         modeSwitchFlag = false;
-        manualFlag = false;
         queryCounts = 0;
 
         handler = new Handler(){
@@ -89,20 +87,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         queryRunnable = new Runnable() {
             @Override
             public void run() {
-                if(refreshFlag) {
-                    refreshFlag = false;
-                    toastMessage(R.string.toast_msg_data_refresh_err);
-                }
-                if(modeSwitchFlag){
-                    modeSwitchFlag = false;
-                    toastMessage(R.string.toast_msg_mode_switch_err);
-                }
-                if(manualFlag){
-                    manualFlag = false;
-                    toastMessage(R.string.toast_msg_param_adjust_err);
-                }
-                if(++queryCounts > NO_RESPONSE_COUNTS && sessionObj.isConnected() && !dialog.isShowing())
+                if(++queryCounts > NO_RESPONSE_COUNTS && sessionObj.isConnected() && !dialog.isShowing()) {
                     dialogShowMessage(R.string.dialog_msg_not_respone);
+                    return;
+                }
+                if(queryCounts > NO_RESPONSE_COUNTS/2) {
+                    if (refreshFlag) {
+                        refreshFlag = false;
+                        toastMessage(R.string.toast_msg_data_refresh_err);
+                    }
+                    if (modeSwitchFlag) {
+                        modeSwitchFlag = false;
+                        toastMessage(R.string.toast_msg_mode_switch_err);
+                    }
+                }
                 if(!sessionObj.isConnected())
                     return;
                 sessionObj.write(RuntimeData.getQueryBean());
@@ -266,9 +264,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 int modeIndex = DataTranslate.beanModeToNum(RuntimeData.getAdjustBean());
                 if(modeIndex == i) {
                     refreshFlag = true;
-                    sessionObj.write(RuntimeData.getAdjustBean());
-                    toastMessage(R.string.toast_msg_data_refreshing);
                     sessionObj.write(RuntimeData.getQueryBean());
+                    toastMessage(R.string.toast_msg_data_refreshing);
                     return;
                 }
                 modeSwitchFlag = true;
@@ -291,22 +288,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+        if(RuntimeData.getAdjustBean().getControlMode() != StateBean.ControlMode.MANUAL_MODE)
+            return;
         for(int i = 0; i < SourceConstant.ADJUST_SEEKBAR_ID.length; i++){
             if(seekBar.getId() == SourceConstant.ADJUST_SEEKBAR_ID[i]){
                 setValueOnTextView(ledAdjustText.get(i), SourceConstant.LED_VALUE_STR[i], progress);
                 if(i == 0)
                     RuntimeData.getAdjustBean().setLed1Value(progress);
-                else if(i == 2)
+                else if(i == 1)
                     RuntimeData.getAdjustBean().setLed2Value(progress);
-                else if(i == 3)
+                else if(i == 2)
                     RuntimeData.getAdjustBean().setLed3Value(progress);
-                else if(i == 4)
+                else //if(i == 3)
                     RuntimeData.getAdjustBean().setLed4Value(progress);
-                if(sessionObj != null && sessionObj.isConnected()) {
+                if(sessionObj != null && sessionObj.isConnected())
                     sessionObj.write(RuntimeData.getAdjustBean());
-                    //sessionObj.write(RuntimeData.getQueryBean());
-                }
-                break;
+                return;
             }
         }
     }
@@ -315,7 +312,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onStartTrackingTouch(SeekBar seekBar) {
         if(sessionObj == null || !sessionObj.isConnected())
             return;
-        toastMessage(R.string.toast_msg_param_adjusting);
         if(RuntimeData.getAdjustBean().getControlMode() == StateBean.ControlMode.MANUAL_MODE)
             return;
         int modeIndex = DataTranslate.beanModeToNum(RuntimeData.getAdjustBean());
@@ -324,16 +320,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         background.setBackgroundResource(R.mipmap.bg_manual);
         background.startAnimation(bgSwitchAnimation);
         RuntimeData.getAdjustBean().setControlMode(StateBean.ControlMode.MANUAL_MODE);
+        toastMessage(R.string.switch_to_manual);
     }
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        if(sessionObj != null && sessionObj.isConnected()) {
-            manualFlag = true;
-            sessionObj.write(RuntimeData.getQueryBean());
-            return;
-        }
-        dialogShowMessage(R.string.dialog_msg_not_connect);
+        if(sessionObj == null || sessionObj.isConnected())
+            dialogShowMessage(R.string.dialog_msg_not_connect);
     }
 
     @Override
@@ -353,34 +346,36 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 case SocketHandlerAdapter.SESSION_MESSAGE_RECEIVED:
                     if(queryCounts != 0)
                         queryCounts = 0;
-                    if(refreshFlag){
-                        refreshFlag = false;
+                    if(refreshFlag) {
                         RuntimeData.getAdjustBean().setControlMode(RuntimeData.getParamBean().getControlMode());
+                        toastMessage(R.string.toast_msg_data_refresh_success);
+                    }
+                    if(modeSwitchFlag) {
+                        modeSwitchFlag = false;
+                        if (RuntimeData.getAdjustBean().getControlMode() != RuntimeData.getParamBean().getControlMode()) {
+                            toastMessage(R.string.toast_msg_mode_switch_err);
+                            MainActivity.this.viewInitWithStateBean(null, RuntimeData.getParamBean());
+                            return;
+                        }
+                        toastMessage(R.string.toast_msg_mode_switch_success);
+                    }
+                    if(RuntimeData.getAdjustBean().getControlMode() == RuntimeData.getParamBean().getControlMode()) {
+                        if(RuntimeData.getAdjustBean().getControlMode() == StateBean.ControlMode.MANUAL_MODE && !refreshFlag)
+                            return;
                         RuntimeData.getAdjustBean().setLed1Value(RuntimeData.getParamBean().getLed1Value());
                         RuntimeData.getAdjustBean().setLed2Value(RuntimeData.getParamBean().getLed2Value());
                         RuntimeData.getAdjustBean().setLed3Value(RuntimeData.getParamBean().getLed3Value());
                         RuntimeData.getAdjustBean().setLed4Value(RuntimeData.getParamBean().getLed4Value());
-                        MainActivity.this.viewInitWithStateBean(RuntimeData.getAdjustBean(), RuntimeData.getParamBean());
-                        toastMessage(R.string.toast_msg_data_refresh_success);
-                        return;
-                    }
-                    if(modeSwitchFlag) {
-                        modeSwitchFlag = false;
-                        if(RuntimeData.getAdjustBean().getControlMode() == RuntimeData.getParamBean().getControlMode())
-                            toastMessage(R.string.toast_msg_mode_switch_success);
-                        else
-                            toastMessage(R.string.toast_msg_mode_switch_err);
-                    }
-                    if(manualFlag){
-                        manualFlag = false;
-                        if(RuntimeData.getAdjustBean().getControlMode() == RuntimeData.getParamBean().getControlMode()
-                        && RuntimeData.getAdjustBean().getLed1Value() == RuntimeData.getParamBean().getLed1Value()
-                        && RuntimeData.getAdjustBean().getLed2Value() == RuntimeData.getParamBean().getLed2Value()
-                        && RuntimeData.getAdjustBean().getLed3Value() == RuntimeData.getParamBean().getLed3Value()
-                        && RuntimeData.getAdjustBean().getLed4Value() == RuntimeData.getParamBean().getLed4Value())
-                            toastMessage(R.string.toast_msg_param_adjust_success);
-                        else
-                            toastMessage(R.string.toast_msg_param_adjust_err);
+                        if(refreshFlag){
+                            refreshFlag = false;
+                            MainActivity.this.viewInitWithStateBean(RuntimeData.getAdjustBean(), RuntimeData.getParamBean());
+                            return;
+                        }
+                        int[] ledValues = DataTranslate.ledNumToArr(RuntimeData.getAdjustBean());
+                        for(int i = 0; i < ledAdjustSeekBar.size(); i++)
+                            ledAdjustSeekBar.get(i).setProgress(ledValues[i]);
+                        for(int i = 0; i < ledAdjustText.size(); i++)
+                            setValueOnTextView(ledAdjustText.get(i), SourceConstant.LED_VALUE_STR[i], ledValues[i]);
                     }
                     MainActivity.this.viewInitWithStateBean(null, RuntimeData.getParamBean());
                     break;
