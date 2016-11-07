@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final int TOAST_DELAY = 1000;
     private static final int REFRESH_TIMEOUT = 1000;
-    private static final int NO_RESPONSE_COUNTS = 3;
+    private static final int NO_RESPONSE_COUNTS = 5;
 
     private Animation bgSwitchAnimation;
 
