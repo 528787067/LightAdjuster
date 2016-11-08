@@ -5,7 +5,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
 public class PackInfo {
-    
+
     /* 版本名 */
     public static String getVersionName(Context context) {
         return getPackageInfo(context).versionName;

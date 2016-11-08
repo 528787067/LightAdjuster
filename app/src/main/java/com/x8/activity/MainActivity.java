@@ -34,7 +34,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private static final int TOAST_DELAY = 1000;
     private static final int REFRESH_TIMEOUT = 1000;
-    private static final int NO_RESPONSE_COUNTS = 5;
+    private static final int NO_RESPONSE_COUNTS = 3;
 
     private Animation bgSwitchAnimation;
 
@@ -325,7 +325,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onStopTrackingTouch(SeekBar seekBar) {
-        if(sessionObj == null || sessionObj.isConnected())
+        if(sessionObj == null || !sessionObj.isConnected())
             dialogShowMessage(R.string.dialog_msg_not_connect);
     }
 
